@@ -13,68 +13,82 @@ app.use(express.json());
 //http GET http://localhost:5000/bands
 // Pobieranie danych na temat wszystkich zespołów
 app.get('/bands', async (req, res) => {
-
-  const result = (await client.query("select * from Band"))
-  return(res.send({
-    allGroups: result.rows
-  }))
-  
+  try{
+    const result = (await client.query("select * from Band"))
+    
+    return(res.send({
+      allGroups: result.rows
+    }))
+  }catch{
+    throw error;
+  }
 });
 
 
 //http POST http://localhost:5000/bands/ name=wor12 date=01/02/25634
 // Dodawanie rekordów do bazy
 app.post('/bands', async (req, res) => {
-  let name = req.body.name;
-  let date = req.body.date;
-
-  const result = (await client.query('INSERT INTO Band (name, creationdate) VALUES($1, $2) RETURNING *', [name, date]))
-  return(res.send({
-    toInsert: result.rows
-  }))
-
+  try{
+    let name = req.body.name;
+    let date = req.body.date;
+    const result = (await client.query('INSERT INTO Band (name, creationdate) VALUES($1, $2) RETURNING *', [name, date]))
+    
+    return(res.send({
+      toInsert: result.rows
+    }))
+  }catch(error){
+    throw error;
+  }
 });
 
 
 //http GET http://localhost:5000/bands/nazwa_zespolu
 // Pobieranie danych na temat zespołu o danej nazwie
 app.get('/bands/:bandName', async (req, res) => {
-
-  let name = req.params.bandName;
-  const result = (await client.query('select * from Band where name=$1', [name]))
-  return res.send({
-    band: result.rows
-  })
-  
+  try{
+    let name = req.params.bandName;
+    const result = (await client.query('select * from Band where name=$1', [name]))
+    
+    return res.send({
+      band: result.rows
+    })
+  }catch(error){
+    throw error;
+  }
 });
 
 
 //http DELETE http://localhost:5000/bands/24
 // Usuwanie rekordu związanego z zespołem
 app.delete('/bands/:id', async (req, res) => {
-  let id = req.params.id;
-
-  const result = (await client.query('DELETE FROM Band WHERE id=$1 RETURNING *', [id]))
-  return(res.send({
-    deleteBand: result.rows 
-  }))
-
+  try{
+    let id = req.params.id;
+    const result = (await client.query('DELETE FROM Band WHERE id=$1 RETURNING *', [id]))  
+    
+    return(res.send({
+      deleteBand: result.rows 
+    }))
+  }catch(error){
+    throw error;
+  }
 });
 
 
 //http PUT http://localhost:5000/bands/1 name=Genesis_new date=06/01/1967
 // Aktualizacja rekordu związanego z zespołem
 app.put('/bands/:id', async (req, res) => {
-  let date = req.body.date;
-  let name = req.body.name;
-  let id = req.params.id;
-
-  const result = (await client.query('UPDATE Band SET name=$2, creationdate=$1 WHERE id=$3 RETURNING *', [date, name, id]))
-  return(res.send({
-    updatedBandId: result.rows
-  }))
-
-
+  try{
+    let date = req.body.date;
+    let name = req.body.name;
+    let id = req.params.id;
+    const result = (await client.query('UPDATE Band SET name=$2, creationdate=$1 WHERE id=$3 RETURNING *', [date, name, id]))
+    
+    return(res.send({
+      updatedBandId: result.rows
+    }))
+  }catch(error){
+    throw error;
+  }
 });
 
 
