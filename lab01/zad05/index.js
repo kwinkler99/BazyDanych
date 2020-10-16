@@ -13,16 +13,11 @@ app.use(express.json());
 //http GET http://localhost:5000/bands
 // Pobieranie danych na temat wszystkich zespołów
 app.get('/bands', async (req, res) => {
-  const query = {
-    text: "select * from Band"
-  }
 
-  client.query(query, (error, result) => {
-    if(error) throw error;
-    return res.send({
-      allGroups: [result.rows]
-    });
-  })
+  const result = (await client.query("select * from Band"))
+  return(res.send({
+    allGroups: result.rows
+  }))
   
 });
 
@@ -32,69 +27,26 @@ app.get('/bands', async (req, res) => {
 app.post('/bands', async (req, res) => {
   let name = req.body.name;
   let date = req.body.date;
-  const query = {
-    text: "INSERT INTO Band (name, creationdate) VALUES($1, $2)",
-    values: [name, date]
-  };
 
-  client.query(query, (error, result) => {
-    if (error) throw error;
-    return res.send({
-      toInsert: {'name': name,
-                 'date': date}
-    });
-  });
+  const result = (await client.query('INSERT INTO Band (name, creationdate) VALUES($1, $2) RETURNING *', [name, date]))
+  return(res.send({
+    toInsert: result.rows
+  }))
 
 });
-
-/*LUB
-app.post('/bands', (req, res) =>{
-  const text = 'INSERT INTO Band (name, creationdate) VALUES($1, $2) RETURNING *'
-  const values = [req.body.name, req.body.date]
-  client.query(text, values, (err, result) => {
-    if(err){
-      console.log(err.stack)
-    }
-    else{
-      console.og(result.row)
-      return res.send({
-        band:result.rows
-      })
-    }
-  })
-})
-
-*/
 
 
 //http GET http://localhost:5000/bands/nazwa_zespolu
 // Pobieranie danych na temat zespołu o danej nazwie
 app.get('/bands/:bandName', async (req, res) => {
-  let name = req.params.bandName;
-  const query = {
-    text: "select * from Band where name=$1",
-    values: [name]
-  }
 
-  client.query(query, (err, result) => {
-    if (err) throw err;
-    return res.send({
-      queryFor: [result.rows]
-    });
-  });
-
-});
-
-/*LUB
-app.get('/bands/:bandName', async (req, res) =>{
   let name = req.params.bandName;
   const result = (await client.query('select * from Band where name=$1', [name]))
   return res.send({
-    band: result
+    band: result.rows
   })
-})
-
-*/
+  
+});
 
 
 //http DELETE http://localhost:5000/bands/24
@@ -102,42 +54,29 @@ app.get('/bands/:bandName', async (req, res) =>{
 app.delete('/bands/:id', async (req, res) => {
   let id = req.params.id;
 
-  const query = {
-    text: "DELETE FROM Band WHERE id=$1",
-    values: [id]
-  }
+  const result = (await client.query('DELETE FROM Band WHERE id=$1 RETURNING *', [id]))
+  return(res.send({
+    deleteBand: result.rows 
+  }))
 
-  client.query(query, (err, result) => {
-    if (err) throw err;
-    return res.send({
-      deletedBandId: id
-    });
-  });
 });
 
 
-//http PUT http://localhost:5000/bands/1 name=Genesis_new creationdate=06/01/1967
+//http PUT http://localhost:5000/bands/1 name=Genesis_new date=06/01/1967
 // Aktualizacja rekordu związanego z zespołem
 app.put('/bands/:id', async (req, res) => {
   let date = req.body.date;
   let name = req.body.name;
   let id = req.params.id;
 
+  const result = (await client.query('UPDATE Band SET name=$2, creationdate=$1 WHERE id=$3 RETURNING *', [date, name, id]))
+  return(res.send({
+    updatedBandId: result.rows
+  }))
 
-
-  const query = {
-    text: "UPDATE Band SET name=$2, creationdate=$1 WHERE id=$3",
-    values: [date, name, id]
-  }
-
-  client.query(query, (err, result) => {
-    if (err) throw err;
-    return res.send({
-      updatedBandId: id
-    });
-  });
 
 });
+
 
 //==================================================================
 // Poniższy kod nie powinien już wymagać zmian
@@ -169,3 +108,97 @@ client
     });
   })
   .catch(err => console.error('Connection error', err.stack));
+
+
+
+/*
+ZADANIE 1----------------------------------
+
+  const query = {
+    text: "select * from Band"
+  }
+  client.query(query, (error, result) => {
+    if(error) throw error;
+    return res.send({
+      allGroups: [result.rows]
+    });
+  })
+
+
+ZADANIE 2 ----------------------------------
+const query = {
+  text: "INSERT INTO Band (name, creationdate) VALUES($1, $2)",
+  values: [name, date]
+};
+
+client.query(query, (error, result) => {
+  if (error) throw error;
+  return res.send({
+    toInsert: {'name': name,
+                'date': date}
+  });
+});
+
+LUB
+
+app.post('/bands', (req, res) =>{
+  const text = 'INSERT INTO Band (name, creationdate) VALUES($1, $2) RETURNING *'
+  const values = [req.body.name, req.body.date]
+  client.query(text, values, (err, result) => {
+    if(err){
+      console.log(err.stack)
+    }
+    else{
+      console.og(result.row)
+      return res.send({
+        band:result.rows
+      })
+    }
+  })
+})
+
+
+ZADANIE 3 ------------------------------------
+app.get('/bands/:bandName', async (req, res) =>{
+  let name = req.params.bandName;
+  const query = {
+    text: "select * from Band where name=$1",
+    values: [name]
+  }
+
+  client.query(query, (err, result) => {
+    if (err) throw err;
+    return res.send({
+      queryFor: [result.rows]
+    });
+  });
+
+})
+
+
+ZADANIE 4 -------------------------------------
+const query = {
+    text: "DELETE FROM Band WHERE id=$1",
+    values: [id]
+  }
+
+  client.query(query, (err, result) => {
+    if (err) throw err;
+    return res.send({
+      deletedBandId: id
+    });
+  });
+
+
+ZADANIE 5 -------------------------------------
+const query = {
+  text: "UPDATE Band SET name=$2, creationdate=$1 WHERE id=$3",
+  values: [date, name, id]
+}
+client.query(query, (err, result) => {
+  if (err) throw err;
+  return res.send({
+    updatedBandId: id
+  });
+});
+*/
