@@ -11,8 +11,7 @@ router.get('/', async (req, res) => {
 
 router.post('/', async (req, res) => {
   const users = new User({
-    ...req.body,
-    registrationDate: Date.now()
+    ...req.body
   })
 
   const insertedUser = await users.save();
@@ -34,7 +33,7 @@ router.get('/registration-raport', async (req, res) => {
   
   const users = await User.aggregate([
     {$match: { registrationDate: {$gte: new Date(date)} } },
-    { $group: { "_id": "$_id", date: {"$first": "$registrationDate"}, count: { $sum: 1 } } }
+    { $group: { "_id": "$registrationDate", count: { $sum: 1 } } }
   ])
 
   return res.send(users);
