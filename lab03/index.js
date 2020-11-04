@@ -2,12 +2,14 @@ const express = require('express');
 const app = express();
 const users = require('./routes/users');
 const posts = require('./routes/posts');
+const data = require('./routes/data');
 
 app.use(express.json());
 
 // „Podłączamy” obsługę „endpointów”, które zdefiniowaliśmy dla kolekcji 'users' w katalogu routes/users.js
 app.use('/users', users);
-app.use('/users/:id/posts', posts);
+users.use('/:id/posts', posts);
+users.use('/posts', data);
 
 require('dotenv').config();
 const dbConnData = {

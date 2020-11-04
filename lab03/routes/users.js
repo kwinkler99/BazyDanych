@@ -19,21 +19,29 @@ router.post('/', async (req, res) => {
   return res.send(insertedUser);
 });
 
-// router.get('/:idUser', async (req, res) => {
-//   const id = req.params.idUser;
-//   User.find({"_id" : id}, function (err, result) {
-//     if (err) return console.error(err);
-//     return res.send(result);
-//   })
-// })
+router.get('/find/:idUser', async (req, res) => {
+  const id = req.params.idUser;
+  User.find({"_id" : id}, function (err, result) {
+    if (err) return console.error(err);
+    return res.send(result);
+  })
+})
 
 
 router.get('/registration-raport', async (req, res) => {
   const date = req.query.date
   
   const users = await User.aggregate([
-    {$match: { registrationDate: {$gte: new Date(date)} } },
-    { $group: { "_id": "$registrationDate", count: { $sum: 1 } } }
+    { $match: 
+      { 
+        registrationDate: {$gt: new Date(date)} 
+      } 
+    },
+    { $group: 
+      { 
+        "_id": "$registrationDate", count: { $sum: 1 } 
+      } 
+    }
   ])
 
   return res.send(users);
@@ -63,7 +71,6 @@ router.patch('/:idUser', async (req, res) => {
     .then((r) => res.send(r))
     .catch(error => res.send({error: error.message}))
 });
-
 
 
 
