@@ -1,6 +1,7 @@
 const express = require('express');
 const router = express.Router({mergeParams: true});
 
+const User = require('../models/User')
 const Post = require('../models/Post');
 
 
@@ -12,14 +13,14 @@ router.get('/:id', async (req, res) => {
     return res.send({});
 });
 
-router.post('/:userId', async (req, res) => {
+router.post('/', async (req, res) => {
   const post = new Post({
     ...req.body,
-    author:req.params.userId,
+    author:req.params.id,
   })
   const createPost = await post.save();
 
-  await User.findByIdAndUpdate(req.params.userId,
+  await User.findByIdAndUpdate(req.params.id,
     {'$push': {'posts': createPost._id}},
     {'new': true});
 
