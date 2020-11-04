@@ -1,13 +1,14 @@
 const express = require('express');
 const router = express.Router();
-
 const User = require('../models/User');
+
 
 router.get('/', async (req, res) => {
   const users = await User.find().populate('posts');
 
   return res.send(users);
 });
+
 
 router.post('/', async (req, res) => {
   const users = new User({
@@ -18,6 +19,7 @@ router.post('/', async (req, res) => {
 
   return res.send(insertedUser);
 });
+
 
 router.get('/find/:idUser', async (req, res) => {
   const id = req.params.idUser;
@@ -56,6 +58,7 @@ router.put('/:idUser', async (req, res) => {
     .catch(error => res.send({error: error.message}))
 });
 
+
 router.delete('/:idUser', async (req, res) => {
   const id = req.params.idUser;
 
@@ -64,6 +67,7 @@ router.delete('/:idUser', async (req, res) => {
   .catch(error => res.send({error: error.message}))
 });
 
+
 router.patch('/:idUser', async (req, res) => {
   const id = req.params.idUser;
 
@@ -71,7 +75,6 @@ router.patch('/:idUser', async (req, res) => {
     .then((r) => res.send(r))
     .catch(error => res.send({error: error.message}))
 });
-
 
 
 module.exports = router;

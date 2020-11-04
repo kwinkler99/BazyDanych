@@ -2,6 +2,7 @@ const express = require('express');
 const router = express.Router();
 const Post = require('../models/Post');
 
+
 router.get('/summary', async(req, res) => {
     const summary  = await Post.aggregate()
         .group(
@@ -19,9 +20,5 @@ router.get('/summary', async(req, res) => {
     return res.send(summary);
 })
 
-  
-
-
 
 module.exports = router;
-
