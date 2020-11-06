@@ -1,5 +1,6 @@
 const express = require('express');
 const router = express.Router({mergeParams: true});
+const { Types } = require('mongoose');
 
 const User = require('../models/User')
 const Post = require('../models/Post');
@@ -17,10 +18,29 @@ router.get('/', async (req, res) => {
 router.get('/:idPost', async (req, res) => {
   const id = req.params.id
   const idPost = req.params.idPost
-
-  Post.findById({"author" : id, _id: idPost})
-  .then((r) => res.send(r))
-  .catch(error => res.send({error: error.message}))
+  if(idPost === "summary"){
+    const users = await User.aggregate()
+    .match(
+      { 
+        _id: Types.ObjectId(id)
+      })
+      .unwind('$posts')
+      .group(
+          {
+              _id: '$email',
+              email: { $first: '$email' },
+              posts: { $sum: 1 }
+          }
+      )
+      .project({ _id: 0 });
+  
+    return res.send(users);
+  }
+  else{
+    Post.findById({"author" : id, _id: idPost})
+    .then((r) => res.send(r))
+    .catch(error => res.send({error: error.message}))
+  }
 });
 
 

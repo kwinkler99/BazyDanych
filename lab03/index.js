@@ -3,7 +3,6 @@ const app = express();
 const users = require('./routes/users');
 const posts = require('./routes/posts');
 const summary = require('./routes/summary');
-const email  = require('./routes/email')
 
 app.use(express.json());
 
@@ -11,7 +10,6 @@ app.use(express.json());
 app.use('/users', users);
 users.use('/:id/posts', posts);
 users.use('/posts', summary);
-users.use('/summary', email)
 
 require('dotenv').config();
 const dbConnData = {

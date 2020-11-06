@@ -21,33 +21,32 @@ router.post('/', async (req, res) => {
 });
 
 
-router.get('/find/:idUser', async (req, res) => {
+router.get('/:idUser', async (req, res) => {
   const id = req.params.idUser;
-  User.find({"_id" : id}, function (err, result) {
-    if (err) return console.error(err);
-    return res.send(result);
-  })
-})
-
-
-router.get('/registration-raport', async (req, res) => {
-  const date = req.query.date
+  if(id === "registration-raport"){
+    const date = req.query.date
+    const users = await User.aggregate()
+      .match(
+        { 
+          registrationDate: {$gt: new Date(date)} 
+        })
+      .group( 
+        { 
+          _id: "$registrationDate", 
+          date: {$first: '$registrationDate'},  
+          count: { $sum: 1 } 
+        })
+      .project( { _id: 0 } )
   
-  const users = await User.aggregate([
-    { $match: 
-      { 
-        registrationDate: {$gt: new Date(date)} 
-      } 
-    },
-    { $group: 
-      { 
-        "_id": "$registrationDate", count: { $sum: 1 } 
-      } 
-    }
-  ])
-
-  return res.send(users);
-});
+    return res.send(users);
+  }
+  else{
+    User.find({"_id" : id}, function (err, result) {
+      if (err) return console.error(err);
+      return res.send(result);
+    })
+  }
+})
 
 
 router.put('/:idUser', async (req, res) => {
