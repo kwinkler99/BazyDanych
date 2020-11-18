@@ -46,9 +46,11 @@ router.put('/:key', async (req, res) => {
 
 router.delete('/:key', async (req, res) => {
   const key = req.params.key;
-  const result = await client.del(key);
+  await client.del(key);
 
-  return res.send(result);
+  return res.send({
+    deleteElem: key
+  });
 });
 
 
