@@ -13,9 +13,14 @@ router.get('/', async (req, res) => {
 });
 
 router.get('/:key', async (req, res) => {
-    return res.send({
-      'msg': 'get key'
-    });
+  const key = req.params.key
+  const value = await client.get(key, (err, result) => {
+    if (err) return res.sendStatus(400)
+    return result
+  })
+  return res.send({
+    key: value
+  })
 });
 
 router.post('/', async (req, res) => {
