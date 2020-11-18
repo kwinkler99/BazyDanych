@@ -32,10 +32,13 @@ router.post('/', async (req, res) => {
 });
 
 router.put('/:key', async (req, res) => {
-  const value = await client.get(req.params.key)
-  const result = value && req.body.ex ? 
-    await client.set(req.params.key, req.body.value, "EX", req.body.ex) : value ?
-    await client.set(req.params.key, req.body.value) :
+  const key = req.params.key
+  const ex = req.body.ex
+  const value = req.body.value
+  const elem = await client.get(key)
+  const result = value && ex ? 
+    await client.set(id, value, "EX", ex) : elem ?
+    await client.set(key, value) :
     {error: "Error"};
 
   return res.send(result);
