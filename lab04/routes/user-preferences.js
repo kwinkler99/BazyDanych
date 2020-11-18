@@ -19,12 +19,16 @@ router.get('/:key', async (req, res) => {
     return result
   })
   return res.send({
-    key: value
+    'value': value
   })
 });
 
 router.post('/', async (req, res) => {
-    return res.send(req.body);
+  const key = req.body.key;
+  const value = req.body.value;
+  const result = req.body.ex ? await client.set(key, value, "EX", req.body.ex) : await client.set(key, value);
+
+  return res.send(result);
 });
 
 router.put('/:key', async (req, res) => {
