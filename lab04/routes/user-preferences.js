@@ -33,6 +33,8 @@ router.post('/', async (req, res) => {
 
 router.put('/:key', async (req, res) => {
   const key = req.params.key;
+  const result = req.body.ex ? await client.set(key, value, "EX", req.body.ex) : await client.set(key, value);
+
   return res.send({
     updatedPreference: key
   });
@@ -40,9 +42,9 @@ router.put('/:key', async (req, res) => {
 
 router.delete('/:key', async (req, res) => {
   const key = req.params.key;
-  return res.send({
-    deletedPreference: key
-  });
+  const result = await client.del(key);
+
+  return res.send(result);
 });
 
 
