@@ -32,3 +32,44 @@ router.delete('/', async (req, res) => {
 });
 
 module.exports = router;
+
+
+/*
+router.get('/', async (req, res) => {
+  try {
+    const allUsers = await client.lrange('user-queue', 0, -1);
+    return res.send(allUsers);
+  } catch (error) {
+    { res.send({ error }) };
+  }
+});
+
+router.post('/', async (req, res) => {
+  try {
+    const newUser = req.body.user;
+    await client.rpush('user-queue', newUser);
+    return res.send({ newUser: newUser});
+  } catch (error) {
+    { res.send({ error }) };
+  }
+});
+
+router.get('/:range', async (req, res) => {
+  try {
+    const stopAt = req.params.range;
+    const usersTo = await client.lrange('user-queue', 0, stopAt);
+    return res.send(usersTo);
+  } catch (error) {
+    { res.send({ error }) };
+  }
+});
+
+router.delete('/', async (req, res) => {
+  try {
+    const deletedUser = await client.lpop('user-queue');
+    return res.send({ deletedUser: deletedUser });
+  } catch (error) {
+    { res.send({ error }) };
+  }
+});
+*/
