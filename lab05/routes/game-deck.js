@@ -3,11 +3,14 @@ const router = express.Router({mergeParams: true});
 const client = require('../config/redisClient');
 
 router.get('/', async (req, res) => {
-
     const keys = await client.keys("*")
     const list = []
-    keys.map(a => list.push({ 'Talia$a': client.smembers(new Set(a))}))
-    return res.send(list);
+    for(let i = 0; i < keys.length; i++){
+        list.push({['Talia ' + keys[i]]: await client.smembers(keys[i])})
+    }
+    return res.send({
+        'list': list
+    });
 });
 
 router.get('/:id-deck', async (req, res) => {
@@ -17,16 +20,19 @@ router.get('/:id-deck', async (req, res) => {
 router.post('/', async (req, res) => {
     const id = req.body.id
     const deck = req.body.deck.split(",")
-    const result = await client.set(id, new Set(deck), "NX");
+    const result = await client.sadd(`game:${id}`, deck);
     if (result){
-        return res.send(result);
-    }
-    else{
-        return res.send("Taki klucz juz istnieje")
+        return res.send(
+            {
+                id: id,
+                cards: deck
+            }
+        );
     }
 });
 
 router.post('/new-game', async (req, res) => {
+    const id = req.body.id
     return res.send(req.body);
 });
 
