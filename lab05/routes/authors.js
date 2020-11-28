@@ -42,7 +42,7 @@ router.post('/', async (req, res) => {
 router.delete('/', async (req, res) => {
     const from = parseInt(req.body.from);
     const to = parseInt(req.body.to);
-    const value = await client.zremrangebyscore('authors', from, to)
+    await client.zremrangebyscore('authors', from, to)
 
     return res.send("usunieto");
 });
