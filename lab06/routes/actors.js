@@ -4,7 +4,25 @@ const router = express.Router({mergeParams: true});
 const driver = require('../config/neo4jDriver');
 
 router.get('/', async (req, res) => {
-    return res.send({});
+    const session = driver.session();
+    const result = []
+    await session
+      .run('MATCH (a:Actor) RETURN a')
+      .subscribe({
+        onKeys: keys => {
+          console.log(keys);
+        },
+        onNext: record => {
+          result.push(record.get('a'))
+        },
+        onCompleted: () => {
+          session.close();
+          return res.send(result)
+        },
+        onError: error => {
+          console.log(error)
+        }
+      })
 });
 
 router.get('/:id', async (req, res) => {
