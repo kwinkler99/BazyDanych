@@ -13,18 +13,29 @@ router.get('/:id', async (req, res) => {
 
 router.post('/', async (req, res) => {
     const session = driver.session();
+    const { name, age, company } = req.body;
+
     await session
-        .run('MERGE (a:Actor {name : \'Arnold\'}) RETURN a.name')
+        .run('MERGE (a:Actor {name : \$name\, age: \$age\, company: \$company\}) RETURN a',
+        {
+          name: name,
+          age: age,
+          company: company
+        })
         .subscribe({
           onKeys: keys => {
             console.log(keys)
           },
           onNext: record => {
-            console.log(record.get('a.name'))
+            console.log(record.get('a'))
           },
           onCompleted: () => {
             session.close();
-            return res.send({});
+            return res.send({
+              'name': name,
+              'age': age,
+              'compaany': company
+            });
           },
           onError: error => {
             console.log(error)
