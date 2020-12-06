@@ -1,5 +1,4 @@
 const express = require('express');
-const { session } = require('../config/neo4jDriver');
 const router = express.Router({mergeParams: true});
 const driver = require('../config/neo4jDriver');
 
@@ -119,8 +118,32 @@ router.put('/:id', async (req, res) => {
       })
 });
 
-router.delete('/', async (req, res) => {
-    return res.send({});
+router.delete('/:id', async (req, res) => {
+  const session = driver.session();
+  const id = parseInt(req.params.id);
+
+  await session
+    .run('MATCH (a:Actor) WHERE ID(a)=\$id\ DETACH DELETE a',
+    {
+      id: id,
+    })
+    .subscribe({
+      onKeys: keys => {
+        console.log(keys)
+      },
+      onNext: record => {
+        console.log(record.get('a'))
+      },
+      onCompleted: () => {
+        session.close();
+        return res.send({
+          'deleteId': id
+        });
+      },
+      onError: error => {
+        console.log(error)
+      }
+    })
 });
 
 module.exports = router;
