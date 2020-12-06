@@ -85,8 +85,38 @@ router.post('/', async (req, res) => {
         })
 });
 
-router.put('/', async (req, res) => {
-    return res.send({});
+router.put('/:id', async (req, res) => {
+    const session = driver.session();
+    const { name, age, company } = req.body;
+    const id = parseInt(req.params.id);
+
+    await session
+      .run('MATCH (a:Actor) WHERE ID(a)=\$id\ SET a.name=\$name\, a.age=\$age\, a.company=\$company\ RETURN a',
+      {
+        id: id,
+        name: name,
+        age: age,
+        company: company
+      })
+      .subscribe({
+        onKeys: keys => {
+          console.log(keys)
+        },
+        onNext: record => {
+          console.log(record.get('a'))
+        },
+        onCompleted: () => {
+          session.close();
+          return res.send({
+            'name': name,
+            'age': age,
+            'compaany': company
+          });
+        },
+        onError: error => {
+          console.log(error)
+        }
+      })
 });
 
 router.delete('/', async (req, res) => {
