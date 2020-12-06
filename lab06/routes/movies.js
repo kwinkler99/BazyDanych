@@ -24,7 +24,26 @@ router.get('/:id', async (req, res) => {
 
 
 router.post('/', async (req, res) => {
-    
+    const { title, releaseYear, genre } = req.body
+    const session = driver.session();
+    try {
+        await session.writeTransaction((tx) =>
+            tx.run("MERGE (m:Movie {title : \$title\, releaseYear: \$releaseYear\, genre: \$genre\}) RETURN m", 
+            {
+                title: title,
+                releaseYear: releaseYear,
+                genre, genre
+            }));
+            
+        session.close();
+        return res.send({
+            'title': title,
+            'releaseYear': releaseYear,
+            'genre': genre
+        });
+    } catch(ex) {
+        res.send(ex);
+    }
 });
 
 router.put('/', async (req, res) => {
