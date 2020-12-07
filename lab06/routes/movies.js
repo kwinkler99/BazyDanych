@@ -63,8 +63,28 @@ router.post('/', async (req, res) => {
     }
 });
 
-router.put('/', async (req, res) => {
-    return res.send({});
+router.put('/:id', async (req, res) => {
+    const id = parseInt(req.params.id)
+    const { title, releaseYear, genre } = req.body;
+    const session = driver.session();
+    try {
+        const result = await session.writeTransaction((tx) =>
+            tx.run('MATCH (m:Movie) WHERE ID(m)=\$id\ SET m.title=\$title\, m.releaseYear=\$releaseYear\, m.genre=\$genre\ RETURN m as title', 
+            {
+                id: id,
+                title: title,
+                releaseYear: releaseYear,
+                genre, genre
+            }));
+            
+        session.close();
+        const respond = result.records.map(record => {
+            return record.get('title');
+        });
+        return res.send(respond);
+    } catch(ex) {
+        res.send(ex);
+    }
 });
 
 router.delete('/', async (req, res) => {
