@@ -6,7 +6,7 @@ router.get('/', async (req, res) => {
     const session = driver.session();
     try {
         const result = await session.readTransaction((tx) =>
-            tx.run("MATCH (m:Movie) RETURN m.title as title"));
+            tx.run("MATCH (m:Movie) RETURN m as title"));
             
         session.close();
         const respond = result.records.map(record => {
@@ -19,7 +19,24 @@ router.get('/', async (req, res) => {
 });
 
 router.get('/:id', async (req, res) => {
-    return res.send({});
+    const session = driver.session();
+    const id = parseInt(req.params.id);
+
+    try {
+        const result = await session.readTransaction((tx) =>
+            tx.run('MATCH (m:Movie) WHERE ID(m)=\$id\ RETURN m as title',
+            {
+              id: id
+            }));
+            
+        session.close()
+        const respond = result.records.map(record => {
+            return record.get('title');
+        });
+        return res.send(respond);
+    } catch(ex) {
+        res.send(ex);
+    }
 });
 
 
@@ -28,7 +45,7 @@ router.post('/', async (req, res) => {
     const session = driver.session();
     try {
         await session.writeTransaction((tx) =>
-            tx.run("MERGE (m:Movie {title : \$title\, releaseYear: \$releaseYear\, genre: \$genre\}) RETURN m", 
+            tx.run("MERGE (m:Movie {title: \$title\, releaseYear: \$releaseYear\, genre: \$genre\}) RETURN m", 
             {
                 title: title,
                 releaseYear: releaseYear,

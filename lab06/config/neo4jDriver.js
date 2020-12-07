@@ -6,6 +6,6 @@ const dbConnData = {
   password: process.env.NEO4J_PASSWORD || 's3cr3t',
 };
 
-const driver = neo4j.driver(dbConnData.uri, neo4j.auth.basic(dbConnData.user, dbConnData.password))
+const driver = neo4j.driver(dbConnData.uri, neo4j.auth.basic(dbConnData.user, dbConnData.password),{disableLosslessIntegers: true})
 
 module.exports = driver;
