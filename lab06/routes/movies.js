@@ -87,12 +87,46 @@ router.put('/:id', async (req, res) => {
     }
 });
 
-router.delete('/', async (req, res) => {
-    return res.send({});
+router.delete('/:id', async (req, res) => {
+    const id = parseInt(req.params.id)
+    const session = driver.session();
+    try {
+        await session.writeTransaction((tx) =>
+            tx.run('MATCH (m:Movie) WHERE ID(m)=\$id\ DETACH DELETE m', 
+            {
+                id: id
+            }));
+            
+        session.close();
+        return res.send({
+            'deleteId': id
+        });
+    } catch(ex) {
+        res.send(ex);
+    }
 });
 
 router.post('/assign-actor', async (req, res) => {
-    return res.send({});
+    const id_actor = parseInt(req.body.id_actor);
+    const id_movie = parseInt(req.body.id_movie);
+    const tmp = []
+    const session = driver.session();
+    try {
+        const result = await session.writeTransaction((tx) =>
+            tx.run('MATCH (a:Actor) WHERE ID(a)=\$id_actor\ MATCH (m:Movie) WHERE ID(m)=\$id_movie\ CREATE (a)-[rel: ACTED_IN]->(m) RETURN rel as title', 
+            {
+                id_actor: id_actor,
+                id_movie: id_movie
+            }));
+            
+        session.close();
+        const respond = result.records.map(record => {
+            return record.get('title');
+        });
+        return res.send(respond);
+    } catch(ex) {
+        res.send(ex);
+    }
 });
 
 module.exports = router;
