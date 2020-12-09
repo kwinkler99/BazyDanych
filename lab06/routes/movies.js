@@ -109,11 +109,10 @@ router.delete('/:id', async (req, res) => {
 router.post('/assign-actor', async (req, res) => {
     const id_actor = parseInt(req.body.id_actor);
     const id_movie = parseInt(req.body.id_movie);
-    const tmp = []
     const session = driver.session();
     try {
         const result = await session.writeTransaction((tx) =>
-            tx.run('MATCH (a:Actor) WHERE ID(a)=\$id_actor\ MATCH (m:Movie) WHERE ID(m)=\$id_movie\ CREATE (a)-[rel: ACTED_IN]->(m) RETURN rel as title', 
+            tx.run('MATCH (a:Actor) WHERE ID(a)=\$id_actor\ MATCH (m:Movie) WHERE ID(m)=\$id_movie\ CREATE (a)-[rel: ACTED_IN]->(m) RETURN a,rel,m', 
             {
                 id_actor: id_actor,
                 id_movie: id_movie
@@ -121,12 +120,69 @@ router.post('/assign-actor', async (req, res) => {
             
         session.close();
         const respond = result.records.map(record => {
-            return record.get('title');
+            return record.get('rel');
         });
         return res.send(respond);
     } catch(ex) {
         res.send(ex);
     }
 });
+
+router.get('/:id/actors', async (req, res) => {
+    const id_movie = parseInt(req.params.id);
+    const session = driver.session();
+    const result = [];
+
+    await session
+        .run('MATCH (m:Movie) WHERE ID(m)=\$id_movie\ MATCH (m)-[rel: ACTED_IN]-(a:Actor) RETURN a,rel,m',
+        {
+          id_movie:id_movie
+        })
+        .subscribe({
+          onKeys: keys => {
+            console.log(keys)
+          },
+          onNext: record => {
+            result.push(record.get('a'));
+          },
+          onCompleted: () => {
+            session.close();
+            return res.send(result)
+          },
+          onError: error => {
+            console.log(error)
+          }
+        })
+});
+
+
+router.get('/:id/distinct-actors', async (req, res) => {
+    const id_movie = parseInt(req.params.id);
+    const session = driver.session();
+    const result = [];
+
+    await session
+        .run('',
+        {
+          id_movie:id_movie
+        })
+        .subscribe({
+          onKeys: keys => {
+            console.log(keys)
+          },
+          onNext: record => {
+            result.push(record.get('a'));
+          },
+          onCompleted: () => {
+            session.close();
+            return res.send(result)
+          },
+          onError: error => {
+            console.log(error)
+          }
+        })
+});
+
+
 
 module.exports = router;
