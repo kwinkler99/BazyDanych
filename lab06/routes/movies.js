@@ -190,7 +190,7 @@ router.get('/:id/actors/:idActor', async (req, res) => {
 
     try {
         const result = await session.readTransaction((tx) =>
-            tx.run('MATCH (m:Movie) WHERE ID(m)=\$id\ RETURN m as title',
+            tx.run('MATCH (m:Movie) WHERE ID(m)=\$id\ MATCH (m)-[rel: ACTED_IN]-(a:Actor) WHERE NOT ID(a)=\$idActor\ MATCH (b: Actor) WHERE ID(b)=\$idActor\ MATCH (a)-[:IS_FRIEND_WITH]-(b) RETURN a as title',
             {
               id: id,
               idActor: idActor
@@ -205,6 +205,5 @@ router.get('/:id/actors/:idActor', async (req, res) => {
         res.send(ex);
     }
 });
-
 
 module.exports = router;

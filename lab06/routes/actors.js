@@ -162,4 +162,33 @@ router.delete('/:id', async (req, res) => {
     })
 });
 
+router.get('/:id/friend/:idFriend', async (req, res) => {
+  const id = parseInt(req.params.id);
+  const idFriend = parseInt(req.params.idFriend);
+  const session = driver.session();
+  const result = [];
+
+  await session
+      .run('MATCH (a:Actor) WHERE ID(a)=\$id\ MATCH (b:Actor) WHERE ID(b)=\$idFriend\ CREATE (a)-[rel: IS_FRIEND_WITH]->(b) RETURN rel',
+      {
+        id: id,
+        idFriend: idFriend
+      })
+      .subscribe({
+        onKeys: keys => {
+          console.log(keys)
+        },
+        onNext: record => {
+          result.push(record.get('rel'));
+        },
+        onCompleted: () => {
+          session.close();
+          return res.send(result)
+        },
+        onError: error => {
+          console.log(error)
+        }
+      })
+});
+
 module.exports = router;
