@@ -162,9 +162,9 @@ router.get('/:id/distinct-actors', async (req, res) => {
     const result = [];
 
     await session
-        .run('',
+        .run('MATCH (m:Movie) WHERE ID(m)=\$id_movie\ MATCH (m)-[rel: ACTED_IN]-(a: Actor) WHERE SIZE((a)-[:ACTED_IN]-()) = 1 RETURN a',
         {
-          id_movie:id_movie
+          id_movie: id_movie
         })
         .subscribe({
           onKeys: keys => {
