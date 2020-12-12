@@ -183,6 +183,28 @@ router.get('/:id/distinct-actors', async (req, res) => {
         })
 });
 
+router.get('/:id/actors/:idActor', async (req, res) => {
+    const session = driver.session();
+    const id = parseInt(req.params.id);
+    const idActor = parseInt(req.params.idActor)
+
+    try {
+        const result = await session.readTransaction((tx) =>
+            tx.run('MATCH (m:Movie) WHERE ID(m)=\$id\ RETURN m as title',
+            {
+              id: id,
+              idActor: idActor
+            }));
+            
+        session.close()
+        const respond = result.records.map(record => {
+            return record.get('title');
+        });
+        return res.send(respond);
+    } catch(ex) {
+        res.send(ex);
+    }
+});
 
 
 module.exports = router;

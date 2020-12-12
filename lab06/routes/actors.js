@@ -24,6 +24,22 @@ router.get('/', async (req, res) => {
       })
 });
 
+router.get('/popular', async (req, res) => {
+  const session = driver.session();
+  try {
+      const result = await session.readTransaction((tx) =>
+          tx.run("MATCH (a:Actor) RETURN a as title ORDER BY SIZE((a)-[:ACTED_IN]-()) DESC LIMIT 3"));
+          
+      session.close();
+      const respond = result.records.map(record => {
+          return record.get('title');
+      });
+      return res.send(respond);
+  } catch(ex) {
+      res.send(ex);
+  }
+});
+
 router.get('/:id', async (req, res) => {
     const session = driver.session();
     const id = parseInt(req.params.id);
