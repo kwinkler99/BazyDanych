@@ -1,6 +1,10 @@
 const express = require('express');
 const router = express.Router();
 const User = require('../models/User');
+const { Types } = require('mongoose');
+const Post = require('../models/Post');
+
+
 
 
 router.get('/', async (req, res) => {
@@ -60,6 +64,13 @@ router.put('/:idUser', async (req, res) => {
 
 router.delete('/:idUser', async (req, res) => {
   const id = req.params.idUser;
+
+  //usuwanie postow usera
+  const user = await User.findById(id);
+  const posts = await user['posts']; 
+  for (let index = 0; index < posts.length; index++) {
+    await Post.findByIdAndDelete(posts[index]);
+  }
 
   User.findByIdAndDelete(id)
   .then((r) => res.send(r))

@@ -60,12 +60,23 @@ router.post('/', async (req, res) => {
 
 
 router.delete('/:idPost', async (req, res) => {
-  const id = req.params.id;
-  const idPost = req.params.idPost
-
-  Post.findByIdAndDelete({"author": id, _id: idPost})
-  .then((r) => res.send(r))
-  .catch(error => res.send({error: error.message}))
+  try {
+    const idUser = req.params.id;
+    const idPost = req.params.idPost;
+    await Post.findOneAndDelete({'author': idUser, '_id': idPost})
+    .then((r) => res.send(r))
+    .catch(error => res.send({error: error.message}))
+   
+   
+   
+    // const result = await User.findById(idUser);
+    // if (result['posts'].includes(idPost)){
+    //   const deletedPost = await Post.findByIdAndDelete(idPost);
+    //   return res.send({ deletedPost: deletedPost });
+    // }
+  } catch (error) {
+    res.send({ error: error.message });
+  }
 });
 
 
